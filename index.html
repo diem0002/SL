@@ -1,30 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GimTimer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gym Timer Simple</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <img src="img/logo.png" alt="Logo" class="logo">
 
-    <div id="setup">
-      <h1>Configurar Timer</h1>
-      <label>Duración del ejercicio (segundos): <input type="number" id="exerciseTime" value="20"></label><br>
-      <label>Duración del descanso (segundos): <input type="number" id="restTime" value="10"></label><br>
-      <label>Rondas: <input type="number" id="rounds" value="8"></label><br>
-      <button id="startBtn">Iniciar</button>
-    </div>
+  <header>
+    <img src="img/logo.png" alt="Logo Gimnasio" class="logo" />
+  </header>
 
-    <div id="timer" class="hidden">
-      <h2 id="mode">Preparado</h2>
-      <div id="countdown">00</div>
-      <div id="roundInfo">Ronda 1/8</div>
-      <button id="stopBtn">Detener</button>
+  <section id="preset-container">
+    <div style="min-width: 220px; margin-top: 10px;">
+      <label>
+        Trabajo:
+        <input type="number" id="custom-work" min="1" value="30" />
+        <select id="custom-work-unit">
+          <option value="sec" selected>seg</option>
+          <option value="min">min</option>
+        </select>
+      </label>
+      <br />
+      <label>
+        Descanso:
+        <input type="number" id="custom-rest" min="0" value="15" />
+        <select id="custom-rest-unit">
+          <option value="sec" selected>seg</option>
+          <option value="min">min</option>
+        </select>
+      </label>
+      <br />
+      <label>
+        Rondas:
+        <input type="number" id="custom-rounds" min="1" value="5" />
+      </label>
+      <br />
+      <button id="start-btn">Iniciar</button>
     </div>
-  </div>
+  </section>
+
+  <section id="timer-view" aria-live="polite" aria-atomic="true" aria-relevant="text" style="display:none;">
+    <div id="phase-display">Trabajo</div>
+    <div id="timer-display">00:00</div>
+    <div id="round-display">Ronda 1 / 5</div>
+    <div id="controls-container">
+      <button id="btn-pause">Pausar</button>
+      <button id="btn-reset">Reiniciar</button>
+      <button id="btn-stop">Parar</button>
+    </div>
+  </section>
+
+  <audio id="sound-start" src="sounds/start.mp3" preload="auto"></audio>
+  <audio id="sound-beep" src="sounds/beep.mp3" preload="auto"></audio>
+  <audio id="sound-end" src="sounds/end.mp3" preload="auto"></audio>
 
   <script src="script.js"></script>
 </body>
