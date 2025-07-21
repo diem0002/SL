@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GimTimer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <img src="img/logo.png" alt="Logo" class="logo">
+
+    <div id="setup">
+      <h1>Configurar Timer</h1>
+      <label>Duración del ejercicio (segundos): <input type="number" id="exerciseTime" value="20"></label><br>
+      <label>Duración del descanso (segundos): <input type="number" id="restTime" value="10"></label><br>
+      <label>Rondas: <input type="number" id="rounds" value="8"></label><br>
+      <button id="startBtn">Iniciar</button>
+    </div>
+
+    <div id="timer" class="hidden">
+      <h2 id="mode">Preparado</h2>
+      <div id="countdown">00</div>
+      <div id="roundInfo">Ronda 1/8</div>
+      <button id="stopBtn">Detener</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 400px;
+  margin: auto;
+}
+
+.logo {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+#countdown {
+  font-size: 60px;
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+body.active-work {
+  background-color: #b2fab4;
+}
+
+body.active-rest {
+  background-color: #b3e5fc;
+}
+
+body.active-finish {
+  background-color: #ffcdd2;
+}
+[]
