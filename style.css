@@ -13,11 +13,15 @@ body {
 }
 
 header {
-  margin: 15px 0;
+  margin: 5px 0 10px 0; /* Margen superior reducido a 5px */
+  padding-top: 5px;
 }
+
 
 .logo {
   width: 300px;
+  height: auto;
+  margin-top: 0;
   user-select: none;
 }
 

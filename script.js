@@ -6,16 +6,10 @@ const startBtn = document.getElementById('start-btn');
 const pauseBtn = document.getElementById('btn-pause');
 const resetBtn = document.getElementById('btn-reset');
 const stopBtn = document.getElementById('btn-stop');
+const soundStartRing = document.getElementById('sound-startRing'); // Único sonido
 
-// Elementos de audio
-const soundStartRing = document.getElementById('sound-startRing'); // Sonido de inicio (2s)
-const soundStart = document.getElementById('sound-start'); // Para doble pitido
-const soundEnd = document.getElementById('sound-end'); // Sonido final
-
-// Configuración de volumen
-soundStartRing.volume = 1.0; // Máximo volumen para inicio
-soundStart.volume = 0.8;     // Volumen para cambios
-soundEnd.volume = 1.0;      // Volumen para final
+// Configuración
+soundStartRing.volume = 1.0; // Volumen máximo
 
 // Variables del temporizador
 let workDuration, restDuration, totalRounds;
@@ -24,7 +18,6 @@ let isWorking = true;
 let timeLeft = 0;
 let timer = null;
 let isPaused = false;
-let isFirstRound = true;
 
 // Iniciar temporizador
 startBtn.onclick = function() {
@@ -48,23 +41,32 @@ startBtn.onclick = function() {
   isWorking = true;
   timeLeft = workDuration;
   isPaused = false;
-  isFirstRound = true;
   
   updateDisplay();
   
-  // Reproducir sonido de inicio (2 segundos) SOLO en primera ronda
-  if (soundStartRing) {
-    soundStartRing.currentTime = 0;
-    soundStartRing.play();
-    
-    // Iniciar temporizador después de 2 segundos (duración del sonido)
-    setTimeout(() => {
-      timer = setInterval(tick, 1000);
-    }, 2000);
-  } else {
+  // Sonido inicial y comenzar después de 2 segundos
+  playStartRing(() => {
     timer = setInterval(tick, 1000);
-  }
+  });
 };
+
+// Función para reproducir StartRing.mp3 (2 segundos)
+function playStartRing(callback) {
+  if (!soundStartRing) {
+    if (callback) callback();
+    return;
+  }
+  
+  soundStartRing.currentTime = 0;
+  soundStartRing.play()
+    .then(() => {
+      if (callback) setTimeout(callback, 2000); // Esperar 2 segundos
+    })
+    .catch(e => {
+      console.error("Error al reproducir sonido:", e);
+      if (callback) callback();
+    });
+}
 
 // Función principal del temporizador
 function tick() {
@@ -91,8 +93,8 @@ function switchToRest() {
   isWorking = false;
   timeLeft = restDuration;
   updateDisplay();
-  // Doble pitido al cambiar fase
-  playDoubleBeep();
+  // Sonido al cambiar a descanso
+  playStartRing();
 }
 
 function nextRoundOrFinish() {
@@ -112,60 +114,30 @@ function finishWorkout() {
   phaseDisplay.textContent = 'Terminado';
   timerDisplay.textContent = '00:00';
   roundDisplay.textContent = '';
-  // Sonido final
-  playSound(soundEnd);
+  // Sin sonido al finalizar
 }
 
 function startNewRound() {
   isWorking = true;
   timeLeft = workDuration;
   updateDisplay();
-  // Doble pitido al cambiar de ronda
-  playDoubleBeep();
-}
-
-// Función para doble pitido
-function playDoubleBeep() {
-  if (!soundStart) return;
-  
-  soundStart.currentTime = 0;
-  soundStart.play();
-  
-  setTimeout(() => {
-    soundStart.currentTime = 0;
-    soundStart.play();
-  }, 300);
-}
-
-// Función para reproducir sonido
-function playSound(soundElement) {
-  if (!soundElement) return;
-  soundElement.currentTime = 0;
-  soundElement.play().catch(e => console.log('Error de sonido:', e));
+  // Sonido al comenzar nueva ronda
+  playStartRing();
 }
 
 // Reiniciar temporizador
 function resetTimer() {
-  isFirstRound = true; // Restablecer para sonido inicial
   isWorking = true;
   currentRound = 1;
   timeLeft = workDuration;
   isPaused = false;
   updateDisplay();
   
-  // Reproducir sonido de inicio (2 segundos) al reiniciar
-  if (soundStartRing) {
-    soundStartRing.currentTime = 0;
-    soundStartRing.play();
-    
-    setTimeout(() => {
-      if (timer) clearInterval(timer);
-      timer = setInterval(tick, 1000);
-    }, 2000);
-  } else {
+  // Sonido al reiniciar
+  playStartRing(() => {
     if (timer) clearInterval(timer);
     timer = setInterval(tick, 1000);
-  }
+  });
 }
 
 // Actualizar la pantalla
