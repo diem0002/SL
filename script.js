@@ -8,14 +8,14 @@ const resetBtn = document.getElementById('btn-reset');
 const stopBtn = document.getElementById('btn-stop');
 
 // Elementos de audio
-const soundStart = document.getElementById('sound-start');
-const soundEnd = document.getElementById('sound-end');
-const soundStartRing = document.getElementById('sound-startRing') || new Audio('sounds/StartRing.mp3');
+const soundStartRing = document.getElementById('sound-startRing'); // Sonido de inicio (2s)
+const soundStart = document.getElementById('sound-start'); // Para doble pitido
+const soundEnd = document.getElementById('sound-end'); // Sonido final
 
 // Configuración de volumen
-soundStart.volume = 0.9;  // Volumen para cuenta regresiva
-soundEnd.volume = 1.0;    // Volumen para final
-soundStartRing.volume = 1.0; // Volumen máximo para inicio
+soundStartRing.volume = 1.0; // Máximo volumen para inicio
+soundStart.volume = 0.8;     // Volumen para cambios
+soundEnd.volume = 1.0;      // Volumen para final
 
 // Variables del temporizador
 let workDuration, restDuration, totalRounds;
@@ -24,7 +24,7 @@ let isWorking = true;
 let timeLeft = 0;
 let timer = null;
 let isPaused = false;
-let isFirstRound = true; // Nueva variable para controlar el sonido inicial
+let isFirstRound = true;
 
 // Iniciar temporizador
 startBtn.onclick = function() {
@@ -40,27 +40,30 @@ startBtn.onclick = function() {
   restDuration = restUnit === 'min' ? rest * 60 : rest;
   totalRounds = rounds;
 
-  // Reiniciar estado
+  // Configurar estado inicial
+  document.getElementById('preset-container').style.display = 'none';
+  document.getElementById('timer-view').style.display = 'flex';
+  
   currentRound = 1;
   isWorking = true;
   timeLeft = workDuration;
   isPaused = false;
   isFirstRound = true;
   
-  // Configurar vista
-  document.getElementById('preset-container').style.display = 'none';
-  document.getElementById('timer-view').style.display = 'flex';
   updateDisplay();
   
-  // Reproducir sonido de inicio SOLO en la primera ronda
-  if (isFirstRound) {
-    playSound(soundStartRing, 1.0);
-    isFirstRound = false;
+  // Reproducir sonido de inicio (2 segundos) SOLO en primera ronda
+  if (soundStartRing) {
+    soundStartRing.currentTime = 0;
+    soundStartRing.play();
+    
+    // Iniciar temporizador después de 2 segundos (duración del sonido)
+    setTimeout(() => {
+      timer = setInterval(tick, 1000);
+    }, 2000);
+  } else {
+    timer = setInterval(tick, 1000);
   }
-  
-  // Iniciar intervalo
-  if (timer) clearInterval(timer);
-  timer = setInterval(tick, 1000);
 };
 
 // Función principal del temporizador
@@ -69,11 +72,6 @@ function tick() {
   
   timeLeft--;
   updateDisplay();
-  
-  // Sonido en 3, 2, 1 segundos
-  if (timeLeft <= 3 && timeLeft > 0) {
-    playSound(soundStart, 0.8);
-  }
   
   // Cambio de fase
   if (timeLeft < 0) {
@@ -93,6 +91,8 @@ function switchToRest() {
   isWorking = false;
   timeLeft = restDuration;
   updateDisplay();
+  // Doble pitido al cambiar fase
+  playDoubleBeep();
 }
 
 function nextRoundOrFinish() {
@@ -112,42 +112,60 @@ function finishWorkout() {
   phaseDisplay.textContent = 'Terminado';
   timerDisplay.textContent = '00:00';
   roundDisplay.textContent = '';
-  playSound(soundEnd, 1.0);
+  // Sonido final
+  playSound(soundEnd);
 }
 
 function startNewRound() {
   isWorking = true;
   timeLeft = workDuration;
   updateDisplay();
-  // Eliminado el playSound() aquí para que no suene en cada ronda
+  // Doble pitido al cambiar de ronda
+  playDoubleBeep();
 }
 
-// Función para reproducir sonido con volumen específico
-function playSound(soundElement, volume) {
-  if (!soundElement) return;
+// Función para doble pitido
+function playDoubleBeep() {
+  if (!soundStart) return;
   
-  try {
-    soundElement.currentTime = 0;
-    soundElement.volume = volume;
-    soundElement.play().catch(e => console.log('Error al reproducir sonido:', e));
-  } catch (e) {
-    console.error('Error con el elemento de audio:', e);
-  }
+  soundStart.currentTime = 0;
+  soundStart.play();
+  
+  setTimeout(() => {
+    soundStart.currentTime = 0;
+    soundStart.play();
+  }, 300);
+}
+
+// Función para reproducir sonido
+function playSound(soundElement) {
+  if (!soundElement) return;
+  soundElement.currentTime = 0;
+  soundElement.play().catch(e => console.log('Error de sonido:', e));
 }
 
 // Reiniciar temporizador
 function resetTimer() {
-  isFirstRound = true; // Restablecer para que suene al reiniciar
-  currentRound = 1;
+  isFirstRound = true; // Restablecer para sonido inicial
   isWorking = true;
+  currentRound = 1;
   timeLeft = workDuration;
   isPaused = false;
-  
   updateDisplay();
   
-  playSound(soundStartRing, 1.0);
-  if (timer) clearInterval(timer);
-  timer = setInterval(tick, 1000);
+  // Reproducir sonido de inicio (2 segundos) al reiniciar
+  if (soundStartRing) {
+    soundStartRing.currentTime = 0;
+    soundStartRing.play();
+    
+    setTimeout(() => {
+      if (timer) clearInterval(timer);
+      timer = setInterval(tick, 1000);
+    }, 2000);
+  } else {
+    if (timer) clearInterval(timer);
+    timer = setInterval(tick, 1000);
+  }
 }
 
 // Actualizar la pantalla
