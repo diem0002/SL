@@ -13,30 +13,30 @@
   </header>
 
   <section id="preset-container">
-    <div style="min-width: 220px; margin-top: 10px;">
-      <label>
-        Trabajo:
-        <input type="number" id="custom-work" min="1" value="30" />
-        <select id="custom-work-unit">
+    <div class="timer-settings">
+      <label class="input-group">
+        <span>Trabajo:</span>
+        <input type="number" id="custom-work" min="1" max="99" value="30" class="time-input" />
+        <select id="custom-work-unit" class="unit-select">
           <option value="sec" selected>seg</option>
           <option value="min">min</option>
         </select>
       </label>
-      <br />
-      <label>
-        Descanso:
-        <input type="number" id="custom-rest" min="0" value="15" />
-        <select id="custom-rest-unit">
+      
+      <label class="input-group">
+        <span>Descanso:</span>
+        <input type="number" id="custom-rest" min="0" max="99" value="15" class="time-input" />
+        <select id="custom-rest-unit" class="unit-select">
           <option value="sec" selected>seg</option>
           <option value="min">min</option>
         </select>
       </label>
-      <br />
-      <label>
-        Rondas:
-        <input type="number" id="custom-rounds" min="1" value="5" />
+      
+      <label class="input-group">
+        <span>Rondas:</span>
+        <input type="number" id="custom-rounds" min="1" max="99" value="5" class="rounds-input" />
       </label>
-      <br />
+      
       <button id="start-btn">Iniciar</button>
     </div>
   </section>
@@ -53,7 +53,6 @@
   </section>
 
   <audio id="sound-start" src="sounds/start.mp3" preload="auto"></audio>
-  <audio id="sound-beep" src="sounds/beep.mp3" preload="auto"></audio>
   <audio id="sound-end" src="sounds/end.mp3" preload="auto"></audio>
 
   <script src="script.js"></script>

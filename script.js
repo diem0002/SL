@@ -1,15 +1,16 @@
-// Obtener referencias a los elementos del DOM
+// Elementos del DOM
 const timerDisplay = document.getElementById('timer-display');
 const phaseDisplay = document.getElementById('phase-display');
 const roundDisplay = document.getElementById('round-display');
-
 const startButton = document.getElementById('start-btn');
 const pauseButton = document.getElementById('btn-pause');
 const resetButton = document.getElementById('btn-reset');
-const stopButton  = document.getElementById('btn-stop');
+const stopButton = document.getElementById('btn-stop');
+const presetContainer = document.getElementById('preset-container');
+const timerView = document.getElementById('timer-view');
 
-// Cargar sonidos
-const soundStart = document.getElementById('sound-start'); // beep 3-2-1
+// Sonidos
+const soundStart = document.getElementById('sound-start');
 const soundEnd = document.getElementById('sound-end');
 
 // Variables del temporizador
@@ -19,128 +20,197 @@ let isWorking = true;
 let timeLeft = 0;
 let intervalId = null;
 let paused = false;
+let initialValues = {};
+let lastBeepTime = -1;
 
-// Función para iniciar
-startButton.addEventListener('click', () => {
+// Iniciar temporizador
+startButton.addEventListener('click', startTimer);
+
+function startTimer() {
+  // Obtener valores iniciales
   const work = parseInt(document.getElementById('custom-work').value);
   const rest = parseInt(document.getElementById('custom-rest').value);
   const rounds = parseInt(document.getElementById('custom-rounds').value);
-
   const workUnit = document.getElementById('custom-work-unit').value;
   const restUnit = document.getElementById('custom-rest-unit').value;
 
-  workSeconds = workUnit === 'min' ? work * 60 : work;
-  restSeconds = restUnit === 'min' ? rest * 60 : rest;
-  totalRounds = rounds;
+  // Guardar valores iniciales
+  initialValues = {
+    workSeconds: workUnit === 'min' ? work * 60 : work,
+    restSeconds: restUnit === 'min' ? rest * 60 : rest,
+    totalRounds: rounds
+  };
 
-  currentRound = 1;
-  isWorking = true;
-  paused = false;
-  timeLeft = workSeconds;
+  resetTimer(true);
 
-  document.getElementById('preset-container').style.display = 'none';
-  document.getElementById('timer-view').style.display = 'flex';
-  document.getElementById('timer-view').className = 'active-work';
-  document.body.className = 'active-work';
-
+  // Configurar vista
+  presetContainer.style.display = 'none';
+  timerView.style.display = 'flex';
+  updateViewClasses();
+  phaseDisplay.textContent = 'Trabajo';
   updateTimerDisplay();
   updateRoundDisplay();
 
+  // Iniciar intervalo
   if (intervalId) clearInterval(intervalId);
   intervalId = setInterval(tick, 1000);
-});
+  
+  // Sonido de inicio
+  playStartSound();
+}
 
-// Pausar
-pauseButton.addEventListener('click', () => {
-  paused = !paused;
-  if (paused) {
-    clearInterval(intervalId);
-    document.getElementById('timer-view').className = 'paused';
-    document.body.className = 'paused';
-    pauseButton.textContent = 'Continuar';
-  } else {
-    intervalId = setInterval(tick, 1000);
-    document.getElementById('timer-view').className = isWorking ? 'active-work' : 'active-rest';
-    document.body.className = isWorking ? 'active-work' : 'active-rest';
-    pauseButton.textContent = 'Pausar';
-  }
-});
-
-// Reiniciar ronda actual
-resetButton.addEventListener('click', () => {
-  timeLeft = isWorking ? workSeconds : restSeconds;
-  updateTimerDisplay();
-});
-
-// Detener y volver al inicio
-stopButton.addEventListener('click', () => {
-  clearInterval(intervalId);
-  intervalId = null;
-  document.getElementById('preset-container').style.display = 'flex';
-  document.getElementById('timer-view').style.display = 'none';
-  document.body.className = '';
-  document.getElementById('timer-view').className = '';
-});
-
-// Tick
 function tick() {
-  if (timeLeft <= 0) {
+  timeLeft--;
+  updateTimerDisplay();
+
+  // Beep en 3, 2, 1 segundos (solo si estamos en los últimos 3 segundos)
+  if (timeLeft <= 3 && timeLeft > 0 && timeLeft !== lastBeepTime) {
+    playStartSound();
+    lastBeepTime = timeLeft;
+  }
+
+  // Cambio de fase cuando llega a 0
+  if (timeLeft < 0) {
     if (isWorking) {
       if (restSeconds > 0) {
-        isWorking = false;
-        timeLeft = restSeconds;
-        document.getElementById('timer-view').className = 'active-rest';
-        document.body.className = 'active-rest';
-        phaseDisplay.textContent = 'Descanso';
-        soundStart.currentTime = 0;
-        soundStart.play();
+        // Cambiar a descanso
+        switchToRest();
       } else {
+        // Pasar directamente a siguiente ronda
         nextRoundOrFinish();
       }
     } else {
+      // Terminó el descanso
       nextRoundOrFinish();
     }
-  } else {
-    // beep en los últimos 3, 2, 1 segundos
-    if (timeLeft === 3 || timeLeft === 2 || timeLeft === 1) {
-      soundStart.currentTime = 0;
-      soundStart.play();
-    }
-
-    timeLeft--;
-    updateTimerDisplay();
   }
+}
+
+function switchToRest() {
+  isWorking = false;
+  timeLeft = restSeconds;
+  lastBeepTime = -1; // Resetear el último beep
+  updateViewClasses();
+  phaseDisplay.textContent = 'Descanso';
+  updateTimerDisplay();
+  // No reproducir sonido aquí
 }
 
 function nextRoundOrFinish() {
   currentRound++;
+  
   if (currentRound > totalRounds) {
-    clearInterval(intervalId);
-    document.getElementById('timer-view').className = 'finished';
-    document.body.className = 'finished';
-    phaseDisplay.textContent = 'Fin del entrenamiento';
-    timerDisplay.textContent = '00:00';
-    roundDisplay.textContent = '';
-    soundEnd.currentTime = 0;
-    soundEnd.play();
+    // Finalizar entrenamiento
+    finishWorkout();
   } else {
-    isWorking = true;
-    timeLeft = workSeconds;
-    document.getElementById('timer-view').className = 'active-work';
-    document.body.className = 'active-work';
-    phaseDisplay.textContent = 'Trabajo';
-    updateRoundDisplay();
-    soundStart.currentTime = 0;
-    soundStart.play();
+    // Nueva ronda
+    startNewRound();
   }
 }
 
+function finishWorkout() {
+  clearInterval(intervalId);
+  intervalId = null;
+  timerView.className = 'finished';
+  document.body.className = 'finished';
+  phaseDisplay.textContent = 'Terminado';
+  timerDisplay.textContent = '00:00';
+  roundDisplay.textContent = '';
+  soundEnd.currentTime = 0;
+  soundEnd.play();
+}
+
+function startNewRound() {
+  isWorking = true;
+  timeLeft = workSeconds;
+  lastBeepTime = -1; // Resetear el último beep
+  updateViewClasses();
+  phaseDisplay.textContent = 'Trabajo';
+  updateRoundDisplay();
+  playStartSound(); // Sonido al inicio de nueva ronda
+}
+
+// Reiniciar completamente
+resetButton.addEventListener('click', () => resetTimer(false));
+
+function resetTimer(isInitialStart) {
+  // Restaurar valores iniciales
+  workSeconds = initialValues.workSeconds || 30;
+  restSeconds = initialValues.restSeconds || 15;
+  totalRounds = initialValues.totalRounds || 5;
+  currentRound = 1;
+  isWorking = true;
+  timeLeft = workSeconds;
+  lastBeepTime = -1;
+  
+  // Actualizar vista
+  updateViewClasses();
+  updateTimerDisplay();
+  updateRoundDisplay();
+  phaseDisplay.textContent = 'Trabajo';
+  
+  // Reiniciar intervalo si estaba corriendo y no es pausa
+  if (!paused && !isInitialStart && intervalId) {
+    clearInterval(intervalId);
+    intervalId = setInterval(tick, 1000);
+  }
+  
+  if (!isInitialStart) {
+    playStartSound();
+  }
+}
+
+// Pausar/continuar
+pauseButton.addEventListener('click', togglePause);
+
+function togglePause() {
+  paused = !paused;
+  
+  if (paused) {
+    clearInterval(intervalId);
+    timerView.className = 'paused';
+    document.body.className = 'paused';
+    phaseDisplay.textContent = 'Pausado';
+    pauseButton.textContent = 'Continuar';
+  } else {
+    intervalId = setInterval(tick, 1000);
+    updateViewClasses();
+    phaseDisplay.textContent = isWorking ? 'Trabajo' : 'Descanso';
+    pauseButton.textContent = 'Pausar';
+  }
+}
+
+// Detener temporizador
+stopButton.addEventListener('click', stopTimer);
+
+function stopTimer() {
+  clearInterval(intervalId);
+  intervalId = null;
+  paused = false;
+  presetContainer.style.display = 'flex';
+  timerView.style.display = 'none';
+  document.body.className = '';
+  timerView.className = '';
+}
+
+// Funciones auxiliares
+function updateViewClasses() {
+  const viewClass = paused ? 'paused' : (isWorking ? 'active-work' : 'active-rest');
+  timerView.className = viewClass;
+  document.body.className = viewClass;
+}
+
 function updateTimerDisplay() {
-  const min = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-  const sec = (timeLeft % 60).toString().padStart(2, '0');
+  const min = Math.max(0, Math.floor(timeLeft / 60)).toString().padStart(2, '0');
+  const sec = Math.max(0, timeLeft % 60).toString().padStart(2, '0');
   timerDisplay.textContent = `${min}:${sec}`;
 }
 
 function updateRoundDisplay() {
   roundDisplay.textContent = `Ronda ${currentRound} / ${totalRounds}`;
+}
+
+function playStartSound() {
+  soundStart.currentTime = 0;
+  soundStart.play();
 }

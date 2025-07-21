@@ -1,8 +1,9 @@
 body {
-  margin: 0; padding: 0;
+  margin: 0; 
+  padding: 0;
   background: #000;
   color: #fff;
-  font-family: sans-serif;
+  font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,74 +11,92 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
 header {
   margin: 15px 0;
 }
+
 .logo {
   width: 120px;
   user-select: none;
 }
 
+/* Configuración del temporizador */
 #preset-container {
   margin: 20px 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
   justify-content: center;
-  max-width: 600px;
-}
-.preset-btn {
-  background: #222;
-  border: none;
-  border-radius: 15px;
-  color: #fff;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  min-width: 140px;
-  transition: background-color 0.3s ease;
-}
-.preset-btn:hover {
-  background: #444;
-}
-.preset-inputs {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.preset-inputs input,
-.preset-inputs select {
-  padding: 8px 10px;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: none;
-  width: 80px;
-  text-align: center;
+  width: 100%;
 }
 
+.timer-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 220px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.time-input, .rounds-input {
+  width: 50px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 2px solid #444;
+  background: #222;
+  color: white;
+  text-align: center;
+  margin: 0 5px;
+}
+
+.unit-select {
+  width: 60px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 2px solid #444;
+  background: #222;
+  color: white;
+}
+
+/* Ocultar flechas en inputs numéricos */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Botón de inicio */
 #start-btn {
-  margin-top: 20px;
   background: #007700;
-  padding: 14px 32px;
-  font-size: 1.2rem;
-  border-radius: 20px;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border-radius: 15px;
   border: none;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  user-select: none;
+  margin-top: 15px;
+  width: 100%;
+  transition: background-color 0.2s ease;
 }
+
 #start-btn:hover:not(:disabled) {
   background: #00aa00;
 }
+
 #start-btn:disabled {
   background: #444;
-  cursor: default;
+  cursor: not-allowed;
 }
 
-/* Timer view */
+/* Vista del temporizador */
 #timer-view {
   display: none;
   flex-direction: column;
@@ -86,89 +105,105 @@ header {
   flex-grow: 1;
   width: 100%;
   text-align: center;
-  padding: 30px;
+  padding: 20px;
   user-select: none;
 }
-#timer-view.active-work {
+
+/* Estados del temporizador */
+#timer-view.active-work, body.active-work {
   background-color: #0a660a; /* verde */
 }
-#timer-view.active-rest {
-  background-color: #0a4066; /* celeste */
+
+#timer-view.active-rest, body.active-rest {
+  background-color: #0a4066; /* azul */
 }
-#timer-view.paused {
+
+#timer-view.paused, body.paused {
   background-color: #aa8800; /* amarillo */
 }
-#timer-view.finished {
+
+#timer-view.finished, body.finished {
   background-color: #660000; /* rojo */
 }
 
+/* Display del temporizador */
 #timer-display {
-  font-size: 7rem;
-  font-weight: 900;
-  margin-bottom: 12px;
-  text-shadow: 0 0 10px #000;
-}
-#phase-display {
-  font-size: 2.5rem;
-  margin-bottom: 8px;
-}
-#round-display {
-  font-size: 1.7rem;
-  margin-bottom: 30px;
+  font-size: 5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 0 5px #000;
 }
 
-#btn-pause, #btn-reset, #btn-stop {
-  background: #222;
-  border: none;
-  color: #fff;
-  padding: 12px 24px;
-  margin: 0 8px;
-  border-radius: 20px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.3s ease;
-  min-width: 100px;
+#phase-display {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
-#btn-pause:hover {
-  background: #555500;
-  color: #fff;
+
+#round-display {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
 }
-#btn-reset:hover {
-  background: #555555;
-  color: #fff;
-}
-#btn-stop:hover {
-  background: #aa0000;
-  color: #fff;
-}
+
+/* Controles del temporizador */
 #controls-container {
   display: flex;
   justify-content: center;
   width: 100%;
   max-width: 600px;
   margin-top: 10px;
-}
-body.active-work {
-  background-color: #004d00 !important; /* Verde claro para trabajo */
-  background-image: none !important;
-  color: white;
+  flex-wrap: wrap;
 }
 
-body.active-rest {
-  background-color: #0088cc !important; /* Celeste para descanso */
-  background-image: none !important;
+#btn-pause, #btn-reset, #btn-stop {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 15px;
+  border: none;
   color: white;
+  cursor: pointer;
+  margin: 5px;
+  min-width: 100px;
+  transition: background-color 0.2s ease;
 }
 
-body.paused {
-  background-color: #e6d600 !important; /* Amarillo para pausa */
-  background-image: none !important;
-  color: black;
+#btn-pause {
+  background: #555500;
 }
 
-body.finished {
-  background-color: #cc0000 !important; /* Rojo para final */
-  background-image: none !important;
-  color: white;
+#btn-reset {
+  background: #333;
+}
+
+#btn-stop {
+  background: #770000;
+}
+
+#btn-pause:hover {
+  background: #777700;
+}
+
+#btn-reset:hover {
+  background: #555;
+}
+
+#btn-stop:hover {
+  background: #aa0000;
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+  #timer-display {
+    font-size: 4rem;
+  }
+  
+  #phase-display {
+    font-size: 1.8rem;
+  }
+  
+  #btn-pause, #btn-reset, #btn-stop {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    min-width: 80px;
+  }
 }
